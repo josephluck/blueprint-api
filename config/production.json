@@ -1,0 +1,33 @@
+{
+  "host": "blueprint-app.feathersjs.com",
+  "port": 80,
+  "nedb": "NEDB_BASE_PATH",
+  "public": "../public/",
+  "auth": {
+    "token": {
+      "secret": "FEATHERS_AUTH_SECRET"
+    },
+    "local": {},
+    "bitbucket": {
+      "clientID": "your bitbucket client id",
+      "clientSecret": "your bitbucket client secret",
+      "permissions": {
+        "scope": ["account"]
+      }
+    },
+    "github": {
+      "clientID": "your github client id",
+      "clientSecret": "your github client secret",
+      "permissions": {
+        "scope": []
+      }
+    },
+    "google": {
+      "clientID": "your google client id",
+      "clientSecret": "your google client secret",
+      "permissions": {
+        "scope": ["profile"]
+      }
+    }
+  }
+}

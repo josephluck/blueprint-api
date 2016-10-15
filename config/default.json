@@ -1,0 +1,33 @@
+{
+  "host": "localhost",
+  "port": 3030,
+  "nedb": "../data/",
+  "public": "../public/",
+  "auth": {
+    "token": {
+      "secret": "xNjPfznBmcFDxbdpu4j3Is5dukZNivZOweH/oi8J9MERqoah5eeaW/AGjfXDZCLQZruXkAuyNP8XkvAlkl6yfw=="
+    },
+    "local": {},
+    "bitbucket": {
+      "clientID": "your bitbucket client id",
+      "clientSecret": "your bitbucket client secret",
+      "permissions": {
+        "scope": ["account"]
+      }
+    },
+    "github": {
+      "clientID": "your github client id",
+      "clientSecret": "your github client secret",
+      "permissions": {
+        "scope": []
+      }
+    },
+    "google": {
+      "clientID": "your google client id",
+      "clientSecret": "your google client secret",
+      "permissions": {
+        "scope": ["profile"]
+      }
+    }
+  }
+}
