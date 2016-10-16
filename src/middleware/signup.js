@@ -7,7 +7,6 @@ module.exports = function(app) {
     app.service('companies').create({
       name: body.company_name
     }).then(company => {
-      console.log(company)
       app.service('users').create({
         email: body.email,
         password: body.password,
