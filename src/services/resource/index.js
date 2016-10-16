@@ -4,6 +4,7 @@ const path = require('path');
 const NeDB = require('nedb');
 const service = require('feathers-nedb');
 const hooks = require('./hooks');
+const companyFilter = require('../../filters/company')
 
 module.exports = function(){
   const app = this;
@@ -32,4 +33,8 @@ module.exports = function(){
 
   // Set up our after hooks
   resourceService.after(hooks.after);
+
+  // Set up a filter so that sockets only broadcast resources that have been created against the same company as the
+  // user is registered to
+  resourceService.filter(companyFilter);
 };
