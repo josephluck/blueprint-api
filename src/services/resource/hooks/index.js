@@ -12,8 +12,12 @@ exports.before = {
   ],
   find: [],
   get: [],
-  create: [],
-  update: [],
+  create: [
+    globalHooks.createdBy()
+  ],
+  update: [
+    globalHooks.updatedBy()
+  ],
   patch: [],
   remove: []
 };

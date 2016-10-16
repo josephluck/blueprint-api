@@ -4,14 +4,17 @@ module.exports = function(app) {
   return function(req, res, next) {
     const body = req.body;
 
-    // Get the user service and `create` a new user
-    app.service('users').create({
-      email: body.email,
-      password: body.password
+    app.service('companies').create({
+      name: body.company_name
+    }).then(company => {
+      console.log(company)
+      app.service('users').create({
+        email: body.email,
+        password: body.password,
+        company_id: company._id
+      })
+      .then(user => res.send(user))
     })
-    // Then redirect to the login page
-    .then(user => res.send(user))
-    // On errors, just call our error middleware
     .catch(next);
   };
 };
