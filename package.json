@@ -19,6 +19,7 @@
     "test": "npm run jshint && npm run mocha",
     "jshint": "jshint src/. test/. --config",
     "start": "node src/",
+    "debug": "node --debug src/",
     "mocha": "mocha test/ --recursive"
   },
   "dependencies": {
