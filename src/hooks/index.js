@@ -6,8 +6,8 @@
 // see http://docs.feathersjs.com/hooks/readme.html for more details
 // on hooks.
 
-const getUserIdFromHook = function (hook) {
-  return hook.params.user._id
+const getUser = function (hook) {
+  return hook.params.user
 };
 
 const getCompanyIdFromHook = function (hook) {
@@ -16,7 +16,7 @@ const getCompanyIdFromHook = function (hook) {
 
 exports.createdBy = function(options) {
 	return function(hook) {
-    hook.data.created_by_user_id = getUserIdFromHook(hook);
+    hook.data.created_by = getUser(hook);
 		hook.data.company_id = getCompanyIdFromHook(hook);
 		hook.data.created_at = new Date();
 	}
@@ -24,7 +24,7 @@ exports.createdBy = function(options) {
 
 exports.updatedBy = function(options) {
 	return function(hook) {
-		hook.data.updated_by_user_id = getUserIdFromHook(hook);
+		hook.data.updated_by = getUser(hook);
 		hook.data.updated_at = new Date();
 	}
 }
