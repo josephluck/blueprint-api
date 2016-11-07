@@ -1,8 +1,24 @@
 'use strict';
 
+const faker = require('faker');
+
+const generateRandomPropertyValue = function(property) {
+  if (property.randomCategory && property.randomSubcategory) {
+    let args = [];
+    if (property.randomParams) {
+      let keys = Object.keys(property.randomParams);
+      args = keys.map((key) => property.randomParams[key]);
+    }
+    return faker[property.randomCategory][property.randomSubcategory].apply(null, args);
+  }
+  return null;
+}
+
 const generatePropertyValue = function(property) {
-  let data = "Hey!";
-  return data;
+  if (property.type === 'random') {
+    return generateRandomPropertyValue(property);
+  }
+  return "Hey";
 }
 
 const generateModel = function(model) {
