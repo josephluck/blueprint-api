@@ -18,26 +18,35 @@ apiApp.use(jsonServer.defaults());
 apiApp.use(apiRouter.handler());
 
 mainApp.options('*', cors())
-mainApp.use('/admin', feathersApp)
-mainApp.use('/api', apiApp);
+// mainApp.use('/admin', feathersApp)
+// mainApp.use('/api', apiApp);
 
-feathersApp.service('projects').find().then((projects) => {
-  let jsonData = {
-    "posts": [
+const generateProjectDatabaseData = function (resources) {
+  // let db = {};
+  // resources.forEach((resource) => {
+  //   db[resource.name] = resource;
+  // })
+  // return db;
+  return {
+    users: [
       {
-        "id": 1,
-        "title": "json-server",
-        "author": "typicode"
-      }
-    ],
-    "comments": [
-      {
-        "id": 1,
-        "comment": "Hey"
+        id: 1,
+        name: 'joseph'
       }
     ]
-  };
-  apiRouter.replace(jsonServer.router(jsonData));
+  }
+}
+
+feathersApp.service('projects').find().then((projects) => {
+  projects.data.forEach((project) => {
+    const projectDatabaseData = generateProjectDatabaseData(project.resources);
+    const projectJsonServer = jsonServer.create();
+    const projectRouter = jsonServer.router(projectDatabaseData);
+    projectJsonServer.use(bodyParser.json());
+    projectJsonServer.use(jsonServer.defaults());
+    projectJsonServer.use(projectRouter);
+    mainApp.use(`/api/${project._id}`, projectJsonServer);
+  })
 });
 
 // feathersApp.service('projects').on('updated', (project) => {
