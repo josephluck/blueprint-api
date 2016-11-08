@@ -2,6 +2,9 @@
 
 const faker = require('faker');
 
+/* ------------------------------------------------------------
+  Use faker to create a random value given some options
+------------------------------------------------------------ */
 const generateRandomPropertyValue = function(property) {
   if (property.randomCategory && property.randomSubcategory) {
     let args = [];
@@ -15,6 +18,34 @@ const generateRandomPropertyValue = function(property) {
 }
 
 /* ------------------------------------------------------------
+  Check whether a model is requesting a child resource has
+  a model key  that that is also a child resource that is
+  the same resource as the model above i.e:
+
+  users: [{
+    type: 'anotherResource',
+    anotherResourceName: 'comments'
+  }];
+  comments: [{
+    type: 'anotherResource',
+    anotherResourceName: 'users'
+  }];
+
+  The above will fail since it'll cause an infinite loop of
+  generateResource calls.
+------------------------------------------------------------ */
+const doesResourceCauseInfiniteDataLoop = function(requestedResourceName, otherResource) {
+  for (let i = 0, x = otherResource.model.length; i < x; i++) {
+    if (otherResource.model[i].type === 'anotherResource') {
+      if (otherResource.model[i].otherResourceName === requestedResourceName) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+/* ------------------------------------------------------------
   This is used when a model has a key whose value is from
   another (existing) resource.
   Common use cases for this are relations for example:
@@ -22,10 +53,18 @@ const generateRandomPropertyValue = function(property) {
     comment: 'Cool app, bro',
     createdByUserId: 123 <-- from another resource
   }]
+  The options are:
+  collection - returns a subset of the array of the resource
+  record - returns a random record in the resource
+  id - returns a random id from one of the resources records
 ------------------------------------------------------------ */
-const generateValueFromAnotherResource = function(property, resources) {
-  let otherResource = resources.find(res => res.name === property.childResourceName);
+const generateValueFromAnotherResource = function(property, model, resource, resources) {
+  let otherResource = resources.find(res => res.name === property.otherResourceName);
   if (otherResource) {
+    let resourceCausesInfiniteDataLoop = doesResourceCauseInfiniteDataLoop(resource.name, otherResource);
+    if (resourceCausesInfiniteDataLoop) {
+      return 'ERROR, ' + property.otherResourceName + ' causes infinite data loop';
+    }
     let otherResourceData = generateResource(otherResource, resources);
 
     if (property.anotherResourceMethod === 'collection') {
@@ -41,32 +80,35 @@ const generateValueFromAnotherResource = function(property, resources) {
       return otherResourceData[Math.floor((Math.random() * otherResourceData.length))]
     } else if (property.anotherResourceMethod === 'id') {
       return otherResourceData[Math.floor((Math.random() * otherResourceData.length))].id
+    } else {
+      return otherResourceData;
     }
   }
   return null;
 }
 
-const generatePropertyValue = function(property, resources) {
+const generatePropertyValue = function(property, model, resource, resources) {
   if (property.type === 'random') {
     return generateRandomPropertyValue(property);
   } else if (property.type === 'nestedJson') {
     /* ------------------------------------------------------------
       This is used there's a nested JSON object under a key
-      for instance:
+      for instance these two keys:
       createdByUserId: {id: 1, name: 'Joseph', surname: 'Luck'},
       tel: [{id: 1, no: 01234567890}, {id: 2, no: 07912874984}]
     ------------------------------------------------------------ */
-    return this.generateResource(property, resources);
+    // return generateResource(property, resources);
+    return "Not done yet";
   } else if (property.type === 'anotherResource') {
-    return this.generateValueFromAnotherResource(property, resources);
+    return generateValueFromAnotherResource(property, model, resource, resources);
   }
   return "Hey";
 }
 
-const generateModel = function(model, resources) {
+const generateModel = function(model, resource, resources) {
   let data = {};
   for (let i = 0, x = model.length; i < x; i++) {
-    data[model[i].key] = generatePropertyValue(model[i], resources);
+    data[model[i].key] = generatePropertyValue(model[i], model, resource, resources);
   }
   return data;
 }
@@ -76,7 +118,7 @@ const generateResource = function(resource, resources) {
     let data = [];
     for (let i = 0, x = parseInt(resource.numberOfRecords); i < x; i++) {
       if (resource.model) {
-        let modelData = generateModel(resource.model, resources);
+        let modelData = generateModel(resource.model, resource, resources);
         modelData.id = i + 1;
         data.push(modelData);
       }
