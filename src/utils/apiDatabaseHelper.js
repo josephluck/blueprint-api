@@ -25,8 +25,25 @@ const generateRandomPropertyValue = function(property) {
 ------------------------------------------------------------ */
 const generateValueFromAnotherResource = function(property, resources) {
   let otherResource = resources.find(res => res.name === property.childResourceName);
-  console.log('Implement me');
-  return generateResource(otherResource, resources);
+  if (otherResource) {
+    let otherResourceData = generateResource(otherResource, resources);
+
+    if (property.anotherResourceMethod === 'collection') {
+      if (property.anotherResourceLimit) {
+        let limit = parseFloat(property.anotherResourceLimit);
+        if (limit > otherResourceData.length) {
+          return otherResourceData;
+        }
+        return otherResourceData.slice(0, limit);
+      }
+      return otherResourceData;
+    } else if (property.anotherResourceMethod === 'record') {
+      return otherResourceData[Math.floor((Math.random() * otherResourceData.length))]
+    } else if (property.anotherResourceMethod === 'id') {
+      return otherResourceData[Math.floor((Math.random() * otherResourceData.length))].id
+    }
+  }
+  return null;
 }
 
 const generatePropertyValue = function(property, resources) {
