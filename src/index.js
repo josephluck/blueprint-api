@@ -31,7 +31,9 @@ const setupProjectApi = (project) => {
 }
 
 const removeProjectApi = (project) => {
+  console.log('Should remove project', project._id)
   let existingProjectMiddleware = projectJsonServers[project._id]
+  console.log(existingProjectMiddleware)
   if (existingProjectMiddleware) {
     existingProjectMiddleware.disable()
   }
@@ -47,8 +49,8 @@ adminApp.service('projects').on('created', project => setupProjectApi(project))
 adminApp.service('projects').on('updated', project => setupProjectApi(project))
 adminApp.service('projects').on('patched', project => setupProjectApi(project))
 
-// Remove project api when deleted
-adminApp.service('projects').on('deleted', project => removeProjectApi(project))
+// Remove project api when removed
+adminApp.service('projects').on('removed', project => removeProjectApi(project))
 
 app.use('/admin', adminApp)
 app.configure(Socketio())

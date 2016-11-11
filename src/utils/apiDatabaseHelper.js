@@ -102,7 +102,7 @@ const generatePropertyValue = function(property, model, resource, resources) {
   } else if (property.type === 'anotherResource') {
     return generateValueFromAnotherResource(property, model, resource, resources);
   }
-  return "Hey";
+  return null;
 }
 
 const generateModel = function(model, resource, resources) {
