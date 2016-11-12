@@ -1,20 +1,20 @@
-'use strict';
+'use strict'
 
-const faker = require('faker');
+const faker = require('faker')
 
 /* ------------------------------------------------------------
   Use faker to create a random value given some options
 ------------------------------------------------------------ */
-const generateRandomPropertyValue = function(property) {
+const generateRandomPropertyValue = function (property) {
   if (property.randomCategory && property.randomSubcategory) {
-    let args = [];
+    let args = []
     if (property.randomParams) {
-      let keys = Object.keys(property.randomParams);
-      args = keys.map((key) => property.randomParams[key]);
+      let keys = Object.keys(property.randomParams)
+      args = keys.map((key) => property.randomParams[key])
     }
-    return faker[property.randomCategory][property.randomSubcategory].apply(null, args);
+    return faker[property.randomCategory][property.randomSubcategory].apply(null, args)
   }
-  return null;
+  return null
 }
 
 /* ------------------------------------------------------------
@@ -25,24 +25,24 @@ const generateRandomPropertyValue = function(property) {
   users: [{
     type: 'anotherResource',
     anotherResourceName: 'comments'
-  }];
+  }]
   comments: [{
     type: 'anotherResource',
     anotherResourceName: 'users'
-  }];
+  }]
 
   The above will fail since it'll cause an infinite loop of
   generateResource calls.
 ------------------------------------------------------------ */
-const doesResourceCauseInfiniteDataLoop = function(requestedResourceName, otherResource) {
+const doesResourceCauseInfiniteDataLoop = function (requestedResourceName, otherResource) {
   for (let i = 0, x = otherResource.model.length; i < x; i++) {
     if (otherResource.model[i].type === 'anotherResource') {
       if (otherResource.model[i].otherResourceName === requestedResourceName) {
-        return true;
+        return true
       }
     }
   }
-  return false;
+  return false
 }
 
 /* ------------------------------------------------------------
@@ -58,86 +58,93 @@ const doesResourceCauseInfiniteDataLoop = function(requestedResourceName, otherR
   record - returns a random record in the resource
   id - returns a random id from one of the resources records
 ------------------------------------------------------------ */
-const generateValueFromAnotherResource = function(property, model, resource, resources) {
-  let otherResource = resources.find(res => res.name === property.otherResourceName);
+const generateValueFromAnotherResource = function (property, model, resource, resources) {
+  let otherResource = resources.find(res => res.name === property.otherResourceName)
   if (otherResource) {
-    let resourceCausesInfiniteDataLoop = doesResourceCauseInfiniteDataLoop(resource.name, otherResource);
+    let resourceCausesInfiniteDataLoop = doesResourceCauseInfiniteDataLoop(resource.name, otherResource)
     if (resourceCausesInfiniteDataLoop) {
-      return 'ERROR, ' + property.otherResourceName + ' causes infinite data loop';
+      return 'ERROR, ' + property.otherResourceName + ' causes infinite data loop'
     }
-    let otherResourceData = generateResource(otherResource, resources);
+    let otherResourceData = generateResource(otherResource, resources)
 
     if (property.anotherResourceMethod === 'collection') {
       if (property.anotherResourceLimit) {
-        let limit = parseFloat(property.anotherResourceLimit);
+        let limit = parseFloat(property.anotherResourceLimit)
         if (limit > otherResourceData.length) {
-          return otherResourceData;
+          return otherResourceData
         }
-        return otherResourceData.slice(0, limit);
+        return otherResourceData.slice(0, limit)
       }
-      return otherResourceData;
+      return otherResourceData
     } else if (property.anotherResourceMethod === 'record') {
       return otherResourceData[Math.floor((Math.random() * otherResourceData.length))]
     } else if (property.anotherResourceMethod === 'id') {
       return otherResourceData[Math.floor((Math.random() * otherResourceData.length))].id
     } else {
-      return otherResourceData;
+      return otherResourceData
     }
   }
-  return null;
+  return null
 }
 
-const generatePropertyValue = function(property, model, resource, resources) {
+const generatePredefinedPropertyValue = function (property) {
+  if (property.predefinedType === "string") {
+    return property.predefinedValue
+  } else if (property.predefinedType === "number") {
+    return parseFloat(property.predefinedValue)
+  } else if (property.predefinedType === "boolean") {
+    // Comes in as a string so convert to type bool
+    return property.predefinedValue === "true"
+  } else if (property.predefinedType === "date") {
+    return new Date(property.predefinedValue)
+  }
+  return null
+}
+
+const generatePropertyValue = function (property, model, resource, resources) {
   if (property.type === 'random') {
-    return generateRandomPropertyValue(property);
-  } else if (property.type === 'nestedJson') {
-    /* ------------------------------------------------------------
-      This is used there's a nested JSON object under a key
-      for instance these two keys:
-      createdByUserId: {id: 1, name: 'Joseph', surname: 'Luck'},
-      tel: [{id: 1, no: 01234567890}, {id: 2, no: 07912874984}]
-    ------------------------------------------------------------ */
-    // return generateResource(property, resources);
-    return "Not done yet";
+    return generateRandomPropertyValue(property)
+  } else if (property.type === 'predefined') {
+    return generatePredefinedPropertyValue(property)
   } else if (property.type === 'anotherResource') {
-    return generateValueFromAnotherResource(property, model, resource, resources);
+    return generateValueFromAnotherResource(property, model, resource, resources)
   }
-  return null;
+  return null
 }
 
-const generateModel = function(model, resource, resources) {
-  let data = {};
+const generateModel = function (model, resource, resources) {
+  let data = {}
   for (let i = 0, x = model.length; i < x; i++) {
-    data[model[i].key] = generatePropertyValue(model[i], model, resource, resources);
+    data[model[i].key] = generatePropertyValue(model[i], model, resource, resources)
   }
-  return data;
+  return data
 }
 
-const generateResource = function(resource, resources) {
+const generateResource = function (resource, resources) {
   if (resource.type === 'collection') {
-    let data = [];
+    let data = []
     for (let i = 0, x = parseInt(resource.numberOfRecords); i < x; i++) {
       if (resource.model) {
-        let modelData = generateModel(resource.model, resource, resources);
-        modelData.id = i + 1;
-        data.push(modelData);
+        let modelData = generateModel(resource.model, resource, resources)
+        modelData.id = i + 1
+        data.push(modelData)
       }
     }
-    return data;
+    return data
   }
   if (resource.model) {
-    return generateModel(resource.model, resources);
+    return generateModel(resource.model, resources)
   }
 }
 
 const generateProjectDb = function (resources) {
-  let db = {};
+  let db = {}
   resources.forEach((resource) => {
-    db[resource.name] = generateResource(resource, resources);
+    db[resource.name] = generateResource(resource, resources)
   })
-  return db;
+  return db
 }
 
 module.exports = {
   generateProjectDb
-};
+}
