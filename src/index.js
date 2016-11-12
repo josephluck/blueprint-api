@@ -10,7 +10,7 @@ const app = Feathers()
 const adminApp = require('./app')
 const projectJsonServers = {}
 
-const setupProjectApi = (project) => {
+const setupProjectApi = project => {
   let existingProjectMiddleware = projectJsonServers[project._id]
 
   let projectDatabaseData = ApiDatabaseHelper.generateProjectDb(project.resources)
@@ -30,17 +30,15 @@ const setupProjectApi = (project) => {
   }
 }
 
-const removeProjectApi = (project) => {
-  console.log('Should remove project', project._id)
+const removeProjectApi = project => {
   let existingProjectMiddleware = projectJsonServers[project._id]
-  console.log(existingProjectMiddleware)
   if (existingProjectMiddleware) {
     existingProjectMiddleware.disable()
   }
 }
 
 // Set up projects apis initially
-adminApp.service('projects').find().then((projects) => projects.data.forEach(setupProjectApi))
+adminApp.service('projects').find().then(projects => projects.data.forEach(setupProjectApi))
 
 // Create new project api when new project is created
 adminApp.service('projects').on('created', project => setupProjectApi(project))

@@ -88,14 +88,14 @@ const generateValueFromAnotherResource = function (property, model, resource, re
 }
 
 const generatePredefinedPropertyValue = function (property) {
-  if (property.predefinedType === "string") {
+  if (property.predefinedType === 'string') {
     return property.predefinedValue
-  } else if (property.predefinedType === "number") {
+  } else if (property.predefinedType === 'number') {
     return parseFloat(property.predefinedValue)
-  } else if (property.predefinedType === "boolean") {
+  } else if (property.predefinedType === 'boolean') {
     // Comes in as a string so convert to type bool
-    return property.predefinedValue === "true"
-  } else if (property.predefinedType === "date") {
+    return property.predefinedValue === 'true'
+  } else if (property.predefinedType === 'date') {
     return new Date(property.predefinedValue)
   }
   return null
@@ -139,12 +139,18 @@ const generateResource = function (resource, resources) {
 
 const generateProjectDb = function (resources) {
   let db = {}
-  resources.forEach((resource) => {
+  resources.forEach(resource => {
     db[resource.name] = generateResource(resource, resources)
   })
   return db
 }
 
 module.exports = {
+  generateRandomPropertyValue,
+  generateValueFromAnotherResource,
+  generatePredefinedPropertyValue,
+  generatePropertyValue,
+  generateModel,
+  generateResource,
   generateProjectDb
 }
