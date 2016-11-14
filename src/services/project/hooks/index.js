@@ -3,6 +3,23 @@
 const globalHooks = require('../../../hooks');
 const hooks = require('feathers-hooks');
 const auth = require('feathers-authentication').hooks;
+const errors = require('feathers-errors');
+
+const restrictToUsersOwnProjects = function(options) {
+  return function(hook) {
+    let query = hook.params.query;
+    query.user_id = hook.params.user.id;
+  }
+}
+
+const restrictToUsersOwnProject = function(options) {
+  return function(hook) {
+    let userDidNotCreateProject = hook.result.created_by._id !== hook.params.user.id
+    if (userDidNotCreateProject) {
+      throw new errors.NotFound('You are not authorized to access this information')
+    }
+  }
+}
 
 // Do stuff with the data before saving it
 exports.before = {
@@ -11,7 +28,9 @@ exports.before = {
     auth.populateUser(),
     auth.restrictToAuthenticated()
   ],
-  find: [],
+  find: [
+    restrictToUsersOwnProjects()
+  ],
   get: [],
   create: [
     globalHooks.createdBy()
@@ -27,7 +46,9 @@ exports.before = {
 exports.after = {
   all: [],
   find: [],
-  get: [],
+  get: [
+    restrictToUsersOwnProject()
+  ],
   create: [],
   update: [],
   patch: [],

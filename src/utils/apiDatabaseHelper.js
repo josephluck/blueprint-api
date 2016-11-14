@@ -23,7 +23,6 @@ const generateRandomPropertyValue = function (property) {
         return property.randomParams[key]
       })
     }
-    console.log(args)
     return faker[property.randomCategory][property.randomSubcategory].apply(null, args)
   }
   return null
