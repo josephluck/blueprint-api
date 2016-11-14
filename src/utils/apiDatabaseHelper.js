@@ -10,8 +10,20 @@ const generateRandomPropertyValue = function (property) {
     let args = []
     if (property.randomParams) {
       let keys = Object.keys(property.randomParams)
-      args = keys.map((key) => property.randomParams[key])
+      args = keys.map((key) => {
+        if (key === 'json') {
+          let jsonString = property.randomParams[key]
+          try {
+            JSON.parse(jsonString)
+          } catch (e) {
+            return null
+          }
+          return JSON.parse(jsonString)
+        }
+        return property.randomParams[key]
+      })
     }
+    console.log(args)
     return faker[property.randomCategory][property.randomSubcategory].apply(null, args)
   }
   return null
