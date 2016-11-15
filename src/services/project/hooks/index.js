@@ -52,7 +52,7 @@ const createCollaboratorAfterProjectCreated = function(options) {
     return new Promise((resolve, reject) => {
       hook.app.service('collaborators').create({
         projectId: hook.result._id,
-        userId: hook.params.user._id
+        email: hook.params.user.email
       }).then((collaborator) => {
         let collaborators = []
         collaborators.push(collaborator)

@@ -25,7 +25,6 @@ const saveUserByEmailAddress = function(options) {
           email: hook.data.email
         }
       }).then((users) => {
-        console.log(users)
         if (users.length) {
           hook.data.userId = users[0]._id
           resolve()
@@ -69,7 +68,12 @@ exports.after = {
       field: 'userId'
     })
   ],
-  create: [],
+  create: [
+    hooks.populate('user', {
+      service: 'users',
+      field: 'userId'
+    })
+  ],
   update: [],
   patch: [],
   remove: []
