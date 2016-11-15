@@ -9,7 +9,9 @@ const filterToUsersOwnProjects = function(options) {
   return function(hook) {
     return new Promise((resolve, reject) => {
       hook.app.service('collaborators').find({
-        userId: hook.params.user._id
+        query: {
+          userId: hook.params.user._id
+        }
       }).then((collaborators) => {
         let projectIdsUserHasAccessTo = collaborators.filter((collaborator) => {
           return collaborator.userId === hook.params.user._id
@@ -32,8 +34,10 @@ const restrictToUsersOwnProject = function(options) {
   return function(hook) {
     return new Promise((resolve, reject) => {
       hook.app.service('collaborators').find({
-        projectId: hook.result._id,
-        userId: hook.params.user._id
+        query: {
+          projectId: hook.result._id,
+          userId: hook.params.user._id
+        }
       }).then((collaborators) => {
         resolve()
       }, () => {
@@ -43,7 +47,7 @@ const restrictToUsersOwnProject = function(options) {
   }
 }
 
-const addCollaboratorAfterProjectCreated = function(options) {
+const createCollaboratorAfterProjectCreated = function(options) {
   return function(hook) {
     return new Promise((resolve, reject) => {
       hook.app.service('collaborators').create({
@@ -56,6 +60,24 @@ const addCollaboratorAfterProjectCreated = function(options) {
         resolve()
       }, () => {
         reject()
+      })
+    })
+  }
+}
+
+const addProjectCollaborators = function(options) {
+  return function(hook) {
+    return new Promise((resolve, reject) => {
+      hook.app.service('collaborators').find({
+        query: {
+          projectId: hook.result._id
+        }
+      }).then((collaborators) => {
+        console.log(hook.result._id, collaborators)
+        hook.result.collaborators = collaborators
+        resolve()
+      }, () => {
+        reject(new Error("No collaborators for this project"))
       })
     })
   }
@@ -84,15 +106,30 @@ exports.before = {
 exports.after = {
   all: [],
   find: [
-    filterToUsersOwnProjects()
+    filterToUsersOwnProjects(),
+    hooks.populate('createdByUser', {
+      service: 'users',
+      field: 'createdByUserId'
+    }),
+    hooks.populate('updatedByUser', {
+      service: 'users',
+      field: 'updatedByUserId'
+    })
   ],
   get: [
     restrictToUsersOwnProject(),
-    globalHooks.addCreatedByUser(),
-    globalHooks.addUpdatedByUser()
+    hooks.populate('createdByUser', {
+      service: 'users',
+      field: 'createdByUserId'
+    }),
+    hooks.populate('updatedByUser', {
+      service: 'users',
+      field: 'updatedByUserId'
+    }),
+    addProjectCollaborators()
   ],
   create: [
-    addCollaboratorAfterProjectCreated()
+    createCollaboratorAfterProjectCreated()
   ],
   update: [
     restrictToUsersOwnProject()

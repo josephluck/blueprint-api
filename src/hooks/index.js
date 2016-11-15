@@ -6,31 +6,31 @@
 // see http://docs.feathersjs.com/hooks/readme.html for more details
 // on hooks.
 
-exports.addCreatedByUser = function(options) {
-  return function(hook) {
-    return new Promise((resolve, reject) => {
-      hook.app.service('users').get(hook.result.createdByUserId).then((user) => {
-        hook.result.createdByUser = user
-        resolve()
-      }, () => {
-        reject(new Error("User does not exist"))
-      })
-    })
-  }
-}
+// exports.addCreatedByUser = function(options) {
+//   return function(hook) {
+//     return new Promise((resolve, reject) => {
+//       hook.app.service('users').get(hook.result.createdByUserId).then((user) => {
+//         hook.result.createdByUser = user
+//         resolve()
+//       }, () => {
+//         reject(new Error("User does not exist"))
+//       })
+//     })
+//   }
+// }
 
-exports.addUpdatedByUser = function(options) {
-  return function(hook) {
-    return new Promise((resolve, reject) => {
-      hook.app.service('users').get(hook.result.createdByUserId).then((user) => {
-        hook.result.updatedByUser = user
-        resolve()
-      }, () => {
-        reject(new Error("User does not exist"))
-      })
-    })
-  }
-}
+// exports.addUpdatedByUser = function(options) {
+//   return function(hook) {
+//     return new Promise((resolve, reject) => {
+//       hook.app.service('users').get(hook.result.createdByUserId).then((user) => {
+//         hook.result.updatedByUser = user
+//         resolve()
+//       }, () => {
+//         reject(new Error("User does not exist"))
+//       })
+//     })
+//   }
+// }
 
 exports.addCreatedBy = function(options) {
 	return function(hook) {
