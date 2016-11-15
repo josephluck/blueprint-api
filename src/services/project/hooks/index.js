@@ -73,7 +73,6 @@ const addProjectCollaborators = function(options) {
           projectId: hook.result._id
         }
       }).then((collaborators) => {
-        console.log(hook.result._id, collaborators)
         hook.result.collaborators = collaborators
         resolve()
       }, () => {

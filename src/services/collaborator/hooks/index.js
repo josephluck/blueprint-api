@@ -17,6 +17,28 @@ const addUserToResponse = function(options) {
   }
 }
 
+const saveUserByEmailAddress = function(options) {
+  return function(hook) {
+    return new Promise((resolve, reject) => {
+      hook.app.service('users').find({
+        query: {
+          email: hook.data.email
+        }
+      }).then((users) => {
+        console.log(users)
+        if (users.length) {
+          hook.data.userId = users[0]._id
+          resolve()
+        } else {
+          reject(new Error("User not found"))
+        }
+      }, () => {
+        reject(new Error("User not found"))
+      })
+    })
+  }
+}
+
 exports.before = {
   all: [
     auth.verifyToken(),
@@ -25,7 +47,9 @@ exports.before = {
   ],
   find: [],
   get: [],
-  create: [],
+  create: [
+    saveUserByEmailAddress()
+  ],
   update: [],
   patch: [],
   remove: []

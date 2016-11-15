@@ -21,11 +21,11 @@ module.exports = function(){
   app.use('/collaborators', service(options));
 
   // Get our initialize service to that we can bind hooks
-  const collaboratorsService = app.service('/collaborators');
+  const collaboratorService = app.service('/collaborators');
 
   // Set up our before hooks
-  collaboratorsService.before(hooks.before);
+  collaboratorService.before(hooks.before);
 
   // Set up our after hooks
-  collaboratorsService.after(hooks.after);
+  collaboratorService.after(hooks.after);
 };
