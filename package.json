@@ -33,7 +33,7 @@
     "feathers-configuration": "^0.2.3",
     "feathers-errors": "^2.4.0",
     "feathers-hooks": "^1.5.7",
-    "feathers-nedb": "^2.5.1",
+    "feathers-nedb": "^2.6.0",
     "feathers-rest": "^1.4.4",
     "feathers-socketio": "^1.4.1",
     "nedb": "^1.8.0",

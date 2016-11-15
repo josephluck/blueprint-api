@@ -5,19 +5,59 @@ const hooks = require('feathers-hooks');
 const auth = require('feathers-authentication').hooks;
 const errors = require('feathers-errors');
 
-const restrictToUsersOwnProjects = function(options) {
+const filterToUsersOwnProjects = function(options) {
   return function(hook) {
-    let query = hook.params.query;
-    query.user_id = hook.params.user.id;
+    return new Promise((resolve, reject) => {
+      hook.app.service('collaborators').find({
+        userId: hook.params.user._id
+      }).then((collaborators) => {
+        let projectIdsUserHasAccessTo = collaborators.filter((collaborator) => {
+          return collaborator.userId === hook.params.user._id
+        }).map((collaborator) => {
+          return collaborator.projectId
+        })
+        let projectsUserHasAccessTo = hook.result.filter((project) => {
+          return projectIdsUserHasAccessTo.includes(project._id)
+        })
+        hook.result = projectsUserHasAccessTo
+        resolve()
+      }, () => {
+        reject(new errors.NotFound('This user is not collaborating on any projects'))
+      });
+    })
   }
 }
 
 const restrictToUsersOwnProject = function(options) {
   return function(hook) {
-    let userDidNotCreateProject = hook.result.created_by._id !== hook.params.user.id
-    if (userDidNotCreateProject) {
-      throw new errors.NotFound('You are not authorized to access this information')
-    }
+    return new Promise((resolve, reject) => {
+      hook.app.service('collaborators').find({
+        projectId: hook.result._id,
+        userId: hook.params.user._id
+      }).then((collaborators) => {
+        resolve()
+      }, () => {
+        reject(new errors.NotFound('No permission for this project'))
+      })
+    })
+  }
+}
+
+const addCollaboratorAfterProjectCreated = function(options) {
+  return function(hook) {
+    return new Promise((resolve, reject) => {
+      hook.app.service('collaborators').create({
+        projectId: hook.result._id,
+        userId: hook.params.user._id
+      }).then((collaborator) => {
+        let collaborators = []
+        collaborators.push(collaborator)
+        hook.result.collaborators = collaborators
+        resolve()
+      }, () => {
+        reject()
+      })
+    })
   }
 }
 
@@ -28,15 +68,13 @@ exports.before = {
     auth.populateUser(),
     auth.restrictToAuthenticated()
   ],
-  find: [
-    restrictToUsersOwnProjects()
-  ],
+  find: [],
   get: [],
   create: [
-    globalHooks.createdBy()
+    globalHooks.addCreatedBy()
   ],
   update: [
-    globalHooks.updatedBy()
+    globalHooks.addUpdatedBy()
   ],
   patch: [],
   remove: []
@@ -45,12 +83,24 @@ exports.before = {
 // Do something with the data before responding
 exports.after = {
   all: [],
-  find: [],
+  find: [
+    filterToUsersOwnProjects()
+  ],
   get: [
+    restrictToUsersOwnProject(),
+    globalHooks.addCreatedByUser(),
+    globalHooks.addUpdatedByUser()
+  ],
+  create: [
+    addCollaboratorAfterProjectCreated()
+  ],
+  update: [
     restrictToUsersOwnProject()
   ],
-  create: [],
-  update: [],
-  patch: [],
-  remove: []
+  patch: [
+    restrictToUsersOwnProject()
+  ],
+  remove: [
+    restrictToUsersOwnProject()
+  ]
 };

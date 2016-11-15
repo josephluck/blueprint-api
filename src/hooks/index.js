@@ -6,25 +6,42 @@
 // see http://docs.feathersjs.com/hooks/readme.html for more details
 // on hooks.
 
-const getUser = function (hook) {
-  return hook.params.user
-};
+exports.addCreatedByUser = function(options) {
+  return function(hook) {
+    return new Promise((resolve, reject) => {
+      hook.app.service('users').get(hook.result.createdByUserId).then((user) => {
+        hook.result.createdByUser = user
+        resolve()
+      }, () => {
+        reject(new Error("User does not exist"))
+      })
+    })
+  }
+}
 
-const getCompanyIdFromHook = function (hook) {
-  return hook.params.user.company_id
-};
+exports.addUpdatedByUser = function(options) {
+  return function(hook) {
+    return new Promise((resolve, reject) => {
+      hook.app.service('users').get(hook.result.createdByUserId).then((user) => {
+        hook.result.updatedByUser = user
+        resolve()
+      }, () => {
+        reject(new Error("User does not exist"))
+      })
+    })
+  }
+}
 
-exports.createdBy = function(options) {
+exports.addCreatedBy = function(options) {
 	return function(hook) {
-    hook.data.created_by = getUser(hook);
-		hook.data.company_id = getCompanyIdFromHook(hook);
-		hook.data.created_at = new Date();
+    hook.data.createdByUserId = hook.params.user._id;
+		hook.data.createdAtDateTime = new Date();
 	}
 }
 
-exports.updatedBy = function(options) {
+exports.addUpdatedBy = function(options) {
 	return function(hook) {
-		hook.data.updated_by = getUser(hook);
-		hook.data.updated_at = new Date();
+		hook.data.updatedByUserId = hook.params.user._id;
+		hook.data.updatedAtDateTime = new Date();
 	}
 }
