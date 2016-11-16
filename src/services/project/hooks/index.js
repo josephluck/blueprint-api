@@ -39,7 +39,11 @@ const restrictToUsersOwnProject = function(options) {
           userId: hook.params.user._id
         }
       }).then((collaborators) => {
-        resolve()
+        if (collaborators.length) {
+          resolve()
+        } else {
+          reject(new errors.NotFound('No permission for this project'))
+        }
       }, () => {
         reject(new errors.NotFound('No permission for this project'))
       })
@@ -98,7 +102,9 @@ exports.before = {
     globalHooks.addUpdatedBy()
   ],
   patch: [],
-  remove: []
+  remove: [
+    // Delete the collaborators for garbage collection
+  ]
 };
 
 // Do something with the data before responding
