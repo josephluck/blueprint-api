@@ -19,16 +19,16 @@ const app = feathers();
 app.configure(configuration(path.join(__dirname, '..')));
 
 app.use(compress())
-  .options('*', cors())
-  .use(cors())
-  .use(favicon( path.join(app.get('public'), 'favicon.ico') ))
-  .use('/', serveStatic( app.get('public') ))
-  .use(bodyParser.json())
-  .use(bodyParser.urlencoded({ extended: true }))
-  .configure(hooks())
-  .configure(rest())
-  .configure(socketio())
-  .configure(services)
-  .configure(middleware);
+app.options('*', cors())
+app.use(cors())
+app.use(favicon( path.join(app.get('public'), 'favicon.ico') ))
+app.use('/', serveStatic( app.get('public') ))
+app.use(bodyParser.json())
+app.use(bodyParser.urlencoded({ extended: true }))
+app.configure(hooks())
+app.configure(rest())
+app.configure(socketio())
+app.configure(services)
+app.configure(middleware);
 
 module.exports = app;

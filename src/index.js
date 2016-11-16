@@ -5,8 +5,11 @@ const feathers = require('feathers')
 const socketio = require('feathers-socketio')
 const bodyParser = require('body-parser')
 const jsonServer = require('json-server')
+const cors = require('cors');
 
 const app = feathers()
+app.options('*', cors())
+app.use(cors())
 app.configure(socketio())
 
 const adminApp = require('./app')
