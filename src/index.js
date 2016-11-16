@@ -1,58 +1,64 @@
 'use strict'
 
-const DynamicMiddleware = require('dynamic-middleware')
-const ApiDatabaseHelper = require('./utils/apiDatabaseHelper')
-const Feathers = require('feathers')
-const Socketio = require('feathers-socketio')
-const BodyParser = require('body-parser')
-const JsonServer = require('json-server')
-const app = Feathers()
+const dynamicMiddleware = require('dynamic-middleware')
+const feathers = require('feathers')
+const socketio = require('feathers-socketio')
+const bodyParser = require('body-parser')
+const jsonServer = require('json-server')
+
+const app = feathers()
+app.configure(socketio())
+
 const adminApp = require('./app')
-const projectJsonServers = {}
+const apiDatabaseHelper = require('./utils/apiDatabaseHelper')
+const existingProjectApis = {}
 
-const setupProjectApi = project => {
-  let existingProjectMiddleware = projectJsonServers[project._id]
+const setupProjectApi = (project, existingProjectApis, app) => {
+  let existingProjectMiddleware = existingProjectApis[project._id]
 
-  let projectDatabaseData = ApiDatabaseHelper.generateProjectDb(project.resources)
-  let projectJsonServer = JsonServer.create()
-  let projectRouter = JsonServer.router(projectDatabaseData)
-  projectJsonServer.use(BodyParser.json())
-  projectJsonServer.use(JsonServer.defaults())
+  let projectDatabaseData = apiDatabaseHelper.generateProjectDb(project.resources)
+  let projectJsonServer = jsonServer.create()
+  let projectRouter = jsonServer.router(projectDatabaseData)
+  projectJsonServer.use(bodyParser.json())
+  projectJsonServer.use(jsonServer.defaults())
   projectJsonServer.use(projectRouter)
 
   if (existingProjectMiddleware) {
     let newProjectMiddleware = existingProjectMiddleware.replace(projectJsonServer)
     existingProjectMiddleware = newProjectMiddleware
   } else {
-    let newProjectMiddleware = DynamicMiddleware.create(projectJsonServer)
-    projectJsonServers[project._id] = newProjectMiddleware
+    let newProjectMiddleware = dynamicMiddleware.create(projectJsonServer)
+    existingProjectApis[project._id] = newProjectMiddleware
     app.use(`/api/${project._id}`, newProjectMiddleware.handler())
   }
 }
 
-const removeProjectApi = project => {
-  let existingProjectMiddleware = projectJsonServers[project._id]
-  if (existingProjectMiddleware) {
-    existingProjectMiddleware.disable()
+const removeProjectApi = (project, existingProjectApis) => {
+  let middleware = existingProjectApis[project._id]
+  if (middleware) {
+    middleware.disable()
   }
 }
 
-// Set up projects apis initially
-adminApp.service('projects').find().then(projects => projects.data.forEach(setupProjectApi))
-
-// Create new project api when new project is created
-adminApp.service('projects').on('created', project => setupProjectApi(project))
-
-// Update project api when changed
-adminApp.service('projects').on('updated', project => setupProjectApi(project))
-adminApp.service('projects').on('patched', project => setupProjectApi(project))
-
-// Remove project api when removed
-adminApp.service('projects').on('removed', project => removeProjectApi(project))
+adminApp.service('projects').find().then((projects) => {
+  projects.data.forEach((project) => {
+    setupProjectApi(project, existingProjectApis, app)
+  })
+})
+adminApp.service('projects').on('created', (project) => {
+  setupProjectApi(project, existingProjectApis, app)
+})
+adminApp.service('projects').on('updated', (project) => {
+  setupProjectApi(project, existingProjectApis, app)
+})
+adminApp.service('projects').on('patched', (project) => {
+  setupProjectApi(project, existingProjectApis, app)
+})
+adminApp.service('projects').on('removed', (project) => {
+  removeProjectApi(project, existingProjectApis)
+})
 
 app.use('/admin', adminApp)
-app.configure(Socketio())
 
-const port = adminApp.get('port')
+const port = 3030
 const server = app.listen(port)
-adminApp.setup(server)
