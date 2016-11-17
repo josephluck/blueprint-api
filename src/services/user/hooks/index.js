@@ -1,5 +1,7 @@
 'use strict';
 
+const gravatar = require('./gravatar');
+
 const globalHooks = require('../../../hooks');
 const hooks = require('feathers-hooks');
 const auth = require('feathers-authentication').hooks;
@@ -18,7 +20,8 @@ exports.before = {
     auth.restrictToOwner({ ownerField: '_id' })
   ],
   create: [
-    auth.hashPassword()
+    auth.hashPassword(),
+    gravatar()
   ],
   update: [
     auth.verifyToken(),

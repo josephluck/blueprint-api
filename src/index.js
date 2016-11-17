@@ -63,5 +63,6 @@ adminApp.service('projects').on('removed', (project) => {
 
 app.use('/admin', adminApp)
 
-const port = process.env.PORT || app.get('port')
+const port = process.env.PORT || 3030
 const server = app.listen(port)
+console.log('Listening on port: ' + port)
