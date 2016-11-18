@@ -100,7 +100,6 @@ const deleteProjectCollaborators = function() {
   }
 }
 
-// Do stuff with the data before saving it
 exports.before = {
   all: [
     auth.verifyToken(),
