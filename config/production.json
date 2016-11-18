@@ -1,11 +1,11 @@
 {
   "host": "blueprint-app.feathersjs.com",
   "port": 80,
-  "nedb": "../data/",
+  "nedb": "NEDB_BASE_BATH",
   "public": "../public/",
   "auth": {
     "token": {
-      "secret": "xNjPfznBmcFDxbdpu4j3Is5dukZNivZOweH/oi8J9MERqoah5eeaW/AGjfXDZCLQZruXkAuyNP8XkvAlkl6yfw=="
+      "secret": "FEATHERS_AUTH_SECRET"
     },
     "local": {},
     "bitbucket": {
