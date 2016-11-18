@@ -69,7 +69,7 @@ const createCollaboratorAfterProjectCreated = function(options) {
   }
 }
 
-const addProjectCollaborators = function(options) {
+const addProjectCollaboratorsToResponse = function(options) {
   return function(hook) {
     return new Promise((resolve, reject) => {
       hook.app.service('collaborators').find({
@@ -81,6 +81,20 @@ const addProjectCollaborators = function(options) {
         resolve()
       }, () => {
         reject(new Error("No collaborators for this project"))
+      })
+    })
+  }
+}
+
+const deleteProjectCollaborators = function() {
+  return function(hook) {
+    return new Promise((resolve, reject) => {
+      hook.app.service('collaborators').remove(null, {
+        projectId: hook.id
+      }).then((resp) => {
+        resolve()
+      }, (err) => {
+        reject()
       })
     })
   }
@@ -103,7 +117,7 @@ exports.before = {
   ],
   patch: [],
   remove: [
-    // Delete the collaborators for garbage collection
+    // deleteProjectCollaborators()
   ]
 };
 
@@ -131,7 +145,7 @@ exports.after = {
       service: 'users',
       field: 'updatedByUserId'
     }),
-    addProjectCollaborators()
+    addProjectCollaboratorsToResponse()
   ],
   create: [
     createCollaboratorAfterProjectCreated()

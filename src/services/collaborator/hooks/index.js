@@ -38,6 +38,26 @@ const saveUserByEmailAddress = function(options) {
   }
 }
 
+const deleteProjectAfterAllCollaboratorsRemoved = function() {
+  return function(hook) {
+    return new Promise((resolve, reject) => {
+      hook.app.service('collaborators').find({
+        query: {
+          projectId: hook.result.projectId
+        }
+      }).then((collaboratorsInProject) => {
+        if (!collaboratorsInProject.length) {
+          hook.app.service('projects').delete(hook.result.projectId).then(() => {
+            resolve()
+          })
+        } else {
+          resolve()
+        }
+      })
+    })
+  }
+}
+
 exports.before = {
   all: [
     auth.verifyToken(),
@@ -76,5 +96,7 @@ exports.after = {
   ],
   update: [],
   patch: [],
-  remove: []
+  remove: [
+    // deleteProjectAfterAllCollaboratorsRemoved()
+  ]
 };
