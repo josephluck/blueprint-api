@@ -1,5 +1,7 @@
 # blueprint
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/josephluck/blueprint-api.svg)](https://greenkeeper.io/)
+
 > 
 
 ## About
